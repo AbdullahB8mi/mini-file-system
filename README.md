@@ -69,9 +69,9 @@ typedef struct {
 | create <filename>          | Create a new file    |
 | write <filename> <content> | Write data to a file |
 | read <filename>            | Display file content |
-| delete <filename>          | Delete a file        |
-| list                       | Show all files       |
-| search <filename>          | Find a file          |
+| delete <filename> (phase2) | Delete a file        |
+| list              (phase2) | Show all files       |
+| search <filename> (phase2) | Find a file          |
 | exit                       | Exit the program     |
 
 ---
