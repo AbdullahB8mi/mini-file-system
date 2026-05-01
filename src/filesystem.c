@@ -127,14 +127,75 @@ void readFile(const char *name) {
     printf("Content of '%s':\n%s\n", name, files[index].content);
 }
 
+/*
+    this function deletes a file
+
+    1 - finds the file by name
+    2 - mark isUsed = 0 (free the slot)
+    3 - clear name and content
+    4 - set size to 0
+*/
 void deleteFile(const char *name) {
+    int index;
 
+    index = findFile(name);
+    if (index == -1) {
+        printf("Error: File '%s' not found.\n", name);
+        return;
+    }
+
+    files[index].isUsed = 0;
+    files[index].size = 0;
+    files[index].name[0] = '\0';
+    files[index].content[0] = '\0';
+
+    printf("File '%s' deleted successfully.\n", name);
 }
 
+
+/*
+    this function lists all files
+
+    1 - loops all file slots
+    2 - checks isUsed == 1
+    3 - prints file name and size
+*/
 void listFiles(void) {
-    
+    int i;
+    int found = 0;
+
+    printf("Files in system:\n");
+
+    for (i = 0; i < MAX_FILES; i++) {
+        if (files[i].isUsed) {
+            printf(" - %s (size: %d bytes)\n", files[i].name, files[i].size);
+            found = 1;
+        }
+    }
+
+    if (!found) {
+        printf("No files found.\n");
+    }
 }
 
+
+/*
+    this function searches for a file
+
+    1 - finds the file by name
+    2 - if found print file details
+    3 - if not found print error
+*/
 void searchFile(const char *name) {
-    
+    int index;
+
+    index = findFile(name);
+    if (index == -1) {
+        printf("File '%s' not found.\n", name);
+        return;
+    }
+
+    printf("File found:\n");
+    printf("Name: %s\n", files[index].name);
+    printf("Size: %d bytes\n", files[index].size);
 }
