@@ -1,9 +1,24 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "filesystem.h"
 
 static FileControlBlock files[MAX_FILES];
 
+/*
+    this function clears the terminal screen
+
+    1 - check system type
+    2 - use cls for windows
+    3 - use clear for linux/mac
+*/
+void clearScreen(void) {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
 
 /* 
     the initializeFileSystem() prepares the file system at the program start
@@ -11,7 +26,6 @@ static FileControlBlock files[MAX_FILES];
     1 - takes 100 file slots as empty 
     2 - clears names and contents
     3 - set size to 0
-
 */
 void initializeFileSystem(void) { 
     int i;
@@ -31,7 +45,6 @@ void initializeFileSystem(void) {
     2 - checks isUsed == 1 
     3 - compares the file name with strcmp
     4 - returns the index if found, if not -1
-
 */
 int findFile(const char *name) {
     int i;
@@ -51,13 +64,12 @@ int findFile(const char *name) {
     3 - stores the file name
     4 - set size to 0 and content to empty
     5 - mark that it is used isUsed = 1
-
 */
 void createFile(const char *name) {
     int i;
 
     if (findFile(name) != -1) {
-        printf("Error: File '%s' already exists.\n", name);
+        printf(RED "Error: File '%s' already exists.\n" RESET, name);
         return;
     }
 
@@ -69,12 +81,12 @@ void createFile(const char *name) {
             files[i].size = 0;
             files[i].content[0] = '\0';
 
-            printf("File '%s' created successfully.\n", files[i].name);
+            printf(GREEN "File '%s' created successfully.\n" RESET, files[i].name);
             return;
         }
     }
 
-    printf("Error: File system is full. Cannot create more files.\n");
+    printf(RED "Error: File system is full.\n" RESET);
 }
 
 /*
@@ -91,13 +103,13 @@ void writeFile(const char *name, const char *content) {
 
     index = findFile(name);
     if (index == -1) {
-        printf("Error: File '%s' not found.\n", name);
+        printf(RED "Error: File '%s' not found.\n" RESET, name);
         return;
     }
 
     len = strlen(content);
     if (len >= MAX_CONTENT_SIZE) {
-        printf("Error: Content exceeds maximum file size (%d bytes).\n", MAX_CONTENT_SIZE - 1);
+        printf(RED "Error: Content exceeds maximum size.\n" RESET);
         return;
     }
 
@@ -105,9 +117,8 @@ void writeFile(const char *name, const char *content) {
     files[index].content[MAX_CONTENT_SIZE - 1] = '\0';
     files[index].size = (int)strlen(files[index].content);
 
-    printf("Content written to file '%s' successfully.\n", name);
+    printf(GREEN "Content written to file '%s'.\n" RESET, name);
 }
-
 
 /*
     this prints the file content
@@ -120,11 +131,12 @@ void readFile(const char *name) {
 
     index = findFile(name);
     if (index == -1) {
-        printf("Error: File '%s' not found.\n", name);
+        printf(RED "Error: File '%s' not found.\n" RESET, name);
         return;
     }
 
-    printf("Content of '%s':\n%s\n", name, files[index].content);
+    printf(BLUE "\nContent of '%s':\n" RESET, name);
+    printf("%s\n", files[index].content);
 }
 
 /*
@@ -140,7 +152,7 @@ void deleteFile(const char *name) {
 
     index = findFile(name);
     if (index == -1) {
-        printf("Error: File '%s' not found.\n", name);
+        printf(RED "Error: File '%s' not found.\n" RESET, name);
         return;
     }
 
@@ -149,35 +161,39 @@ void deleteFile(const char *name) {
     files[index].name[0] = '\0';
     files[index].content[0] = '\0';
 
-    printf("File '%s' deleted successfully.\n", name);
+    printf(GREEN "File '%s' deleted successfully.\n" RESET, name);
 }
-
 
 /*
     this function lists all files
 
     1 - loops all file slots
     2 - checks isUsed == 1
-    3 - prints file name and size
+    3 - prints file name and size in table style
+    4 - prints message if no files found
 */
 void listFiles(void) {
     int i;
-    int found = 0;
+    int count = 0;
 
-    printf("Files in system:\n");
+    printf(BLUE "\n-----------------------------------------------\n" RESET);
+    printf(BLUE "No.   File Name                         Size\n" RESET);
+    printf(BLUE "-----------------------------------------------\n" RESET);
 
     for (i = 0; i < MAX_FILES; i++) {
         if (files[i].isUsed) {
-            printf(" - %s (size: %d bytes)\n", files[i].name, files[i].size);
-            found = 1;
+            count++;
+            printf("%-5d %-30s %d bytes\n", count, files[i].name, files[i].size);
         }
     }
 
-    if (!found) {
-        printf("No files found.\n");
+    if (count == 0) {
+        printf(YELLOW "No files found.\n" RESET);
     }
-}
 
+    printf(BLUE "-----------------------------------------------\n" RESET);
+    printf(YELLOW "Total files: %d / %d\n", count, MAX_FILES);
+}
 
 /*
     this function searches for a file
@@ -191,11 +207,11 @@ void searchFile(const char *name) {
 
     index = findFile(name);
     if (index == -1) {
-        printf("File '%s' not found.\n", name);
+        printf(RED "File '%s' not found.\n" RESET, name);
         return;
     }
 
-    printf("File found:\n");
+    printf(GREEN "File found:\n" RESET);
     printf("Name: %s\n", files[index].name);
     printf("Size: %d bytes\n", files[index].size);
 }
